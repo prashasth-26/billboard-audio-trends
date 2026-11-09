@@ -94,7 +94,7 @@ This project loads a Kaggle dataset that combines per-song Billboard Hot 100 cha
 
 ### Prediction model (Could)
 
-20. Define the prediction target from `peak_position`, for example "reached the top 10" versus "peaked lower". The default threshold is the top 10 (about 19.8% of songs); it must be a named constant, and the class balance must be reported.
+20. Define the prediction target from `peak_position`, for example "reached the top 10" versus "peaked lower". The threshold is the top 5 (3,879 songs, about 11.9%; chosen by the author); it must be a named constant, and the class balance must be reported. Because roughly 88% of songs fall in the "peaked lower" class, a model that always guesses "lower" is right about 88% of the time, so ROC AUC is the main metric and accuracy is secondary.
 21. Fit a baseline logistic regression and one tree-based model (random forest or gradient boosting) using only the Spotify audio features (danceability, energy, key, loudness, mode, speechiness, acousticness, instrumentalness, liveness, valence, tempo, time signature) and, optionally, duration and the explicit flag. The model must NOT use `chart_success_tier`, `hit_longevity_profile`, `acoustic_mood_cluster`, `musical_era`, `evidence_span`, `cot_rationale`, `confidence_score`, `spotify_track_popularity`, `weeks_on_chart`, or any other column derived from chart results, because they leak the outcome. Rows without audio features are excluded and the count reported.
 22. Split train and test sets **by time** (older songs train, newer songs test), not randomly, so the test reflects predicting newer songs. Because the newest songs may still be on the chart, their peak positions can still change; the README must state how songs still charting at the end of the data were handled (for example, excluded from the test set).
 23. Report accuracy alongside a baseline that always predicts the majority class, plus ROC AUC. A model that does not beat the majority-class baseline must be reported as such.
@@ -126,7 +126,7 @@ This project loads a Kaggle dataset that combines per-song Billboard Hot 100 cha
 ## 8. Technical Considerations
 
 - **Language and libraries:** Python, pandas, SQLite (via Python's built-in `sqlite3`), scikit-learn for the model, pytest, Tableau Public.
-- **Why SQLite (proposed, the author may overrule):** It is widely recognized, needs no server, runs on any machine, and supports CTEs and window functions (`LAG`, `RANK`), so it covers every keyword this project needs. PostgreSQL appears on many job listings but adds installation work that conflicts with the weekend budget. DuckDB was used in PRD 0001 and also works, but is less commonly listed by employers.
+- **Why SQLite (decided):** It needs no server, runs on any machine, and supports CTEs and window functions (`LAG`, `RANK`) since version 3.25, so it covers every keyword this project needs. SQLite is not the most common database in job listings (PostgreSQL, MySQL and SQL Server are), but most postings ask for "SQL" in general, and the queries here will be written in standard SQL that also runs on PostgreSQL. The README and resume should say "SQL (SQLite)" and not claim PostgreSQL experience. PostgreSQL would add installation work that conflicts with the weekend budget. DuckDB was used in PRD 0001 and also works, but is less commonly listed by employers.
 - **Schema considerations:** The source is one flat table. Splitting it (songs, audio features, song genres, optionally artists) lets you demonstrate joins and keys, and the genre list is a genuine one-to-many relationship. The cost is extra loading code, and artist names are free text (collaborations are written out in one string) that needs cleaning to make clean keys. Keeping a single table is faster but shows less.
 - **Missing audio features:** About 15.9% of songs have no audio features. The loader must report coverage by decade, and the README must state this.
 - **Repository layout:** `src/` (scripts), `sql/` (schema and queries), `tests/`, `data/` (git-ignored), `tasks/` (PRD and task list), `README.md`.
@@ -147,9 +147,9 @@ This project loads a Kaggle dataset that combines per-song Billboard Hot 100 cha
 
 1. **Dataset contents:** Answered; see Section 1. Still open: which columns differ between the repeated `song_id` rows.
 2. **Grammys:** The author leaned toward leaving them out. Revisit only if the core work finishes early and a clean Grammy dataset is found.
-3. **Schema:** Proposed in requirement 6 (split the flat table into songs, audio features and song genres). Confirm before writing `sql/schema.sql`.
-4. **Database:** The proposal is SQLite. Confirm or change before writing `sql/schema.sql`.
-5. **Model target:** Proposed: top 10 (19.8% of songs). Confirm, or choose #1 (4.1%) or top 5 (11.9%).
+3. **Schema:** Decided: split the flat table into songs, audio features and song genres (requirement 6), with the artists table optional. The author deferred to the recommendation.
+4. **Database:** Decided: SQLite (see Section 8).
+5. **Model target:** Decided: top 5 (11.9% of songs), chosen by the author.
 6. **Dataset license:** Resolved: CC0 Public Domain. Credit the source in the README anyway.
 7. **Scope:** If the weekend runs out, the working plan is to drop the model first, then Tableau, and keep SQL, tests and README.
 8. **`weeks_on_chart` accuracy:** The data card quotes 88 weeks for "Blinding Lights" and the row inspected showed 76. Check a few well-known songs against Billboard before relying on the weeks figures.
