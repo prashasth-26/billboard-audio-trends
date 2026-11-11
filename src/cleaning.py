@@ -7,7 +7,7 @@ import re
 
 import pandas as pd
 
-# The final chart week of the real Billboard data. Rows after it are synthetic
+# The final chart week of the real Billboard data. Rows after it are unreliable
 # (PRD Section 1) and are dropped; songs on this chart are still charting.
 REAL_DATA_END = pd.Timestamp("2021-05-29")
 
@@ -68,15 +68,15 @@ def flag_still_charting(last_week, final_week=REAL_DATA_END) -> int:
 
 
 def drop_bad_rows(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
-    """Remove corrupted and synthetic rows. Returns (kept rows, counts dropped)."""
+    """Remove corrupted and unreliable rows. Returns (kept rows, counts dropped)."""
     no_chart = df[CHART_COLS].isna().all(axis=1)
     last = pd.to_datetime(df["last_week"], errors="coerce")
-    synthetic = ~no_chart & (last > REAL_DATA_END)
+    unreliable = ~no_chart & (last > REAL_DATA_END)
     counts = {
         "corrupted (no chart data)": int(no_chart.sum()),
-        "synthetic (after 2021-05-29)": int(synthetic.sum()),
+        "unreliable (after 2021-05-29)": int(unreliable.sum()),
     }
-    return df[~no_chart & ~synthetic].copy(), counts
+    return df[~no_chart & ~unreliable].copy(), counts
 
 
 def dedupe_songs(df: pd.DataFrame) -> tuple[pd.DataFrame, int]:

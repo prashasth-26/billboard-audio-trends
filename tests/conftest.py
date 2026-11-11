@@ -10,7 +10,7 @@ are known in advance:
   - Kappa appears twice: the first copy has no audio features, the second does
     (the second is kept)
   - 1 corrupted row with no chart data ("37623" by "4")
-  - 1 synthetic row dated after 2021-05-29 ("Lambda (Version 5)")
+  - 1 unreliable row dated after 2021-05-29 ("Lambda (Version 5)")
   - Gamma and Zeta have no audio features
   - Primary artists: Ann Lee (Alpha, Beta, Zeta), Cat Band, Dee & Dum,
     Eve (Eta, Theta), Gus, Hal -> 6 artists

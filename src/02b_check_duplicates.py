@@ -19,14 +19,14 @@ RAW = Path(__file__).resolve().parent.parent / "data" / "raw"
 CSV = RAW / "billboard_hot_100_spotify_audio_features_enriched.csv"
 CHART_COLS = ["peak_position", "weeks_on_chart", "first_week", "last_week"]
 # The real Billboard data ends on this chart week. The 3,000 rows after it
-# look synthetic (see the PRD, Section 1) and are left out.
+# look unreliable (see the PRD, Section 1) and are left out.
 REAL_DATA_END = pd.Timestamp("2021-05-29")
 
 
 def main() -> None:
     df = pd.read_csv(CSV, low_memory=False)
     df = df.dropna(subset=CHART_COLS, how="all")  # the 3 corrupted rows
-    df = df[pd.to_datetime(df["last_week"]) <= REAL_DATA_END]  # synthetic rows
+    df = df[pd.to_datetime(df["last_week"]) <= REAL_DATA_END]  # unreliable rows
     print(f"Rows kept: {len(df)}")
 
     shared = df[df.duplicated("song_id", keep=False)]

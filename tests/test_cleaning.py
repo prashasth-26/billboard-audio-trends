@@ -53,7 +53,7 @@ def test_drop_bad_rows():
     })
     kept, counts = drop_bad_rows(df)
     assert len(kept) == 1
-    assert counts == {"corrupted (no chart data)": 1, "synthetic (after 2021-05-29)": 1}
+    assert counts == {"corrupted (no chart data)": 1, "unreliable (after 2021-05-29)": 1}
 
 
 def test_dedupe_prefers_row_with_audio():

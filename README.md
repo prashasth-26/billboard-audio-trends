@@ -59,16 +59,24 @@ The raw data is not included in this repository; `src/00_download.py` fetches it
 |---|---:|---|
 | Raw file | 32,503 | |
 | Corrupted rows dropped | 3 | No chart data; garbled titles or performers (e.g. title "37623") |
-| Synthetic rows dropped | 3,000 | The last 3,000 rows (see below) |
+| Unreliable rows dropped | 3,000 | The last 3,000 rows (see below) |
 | Duplicate song IDs merged | 117 | 117 IDs appear twice: 24 identical pairs, 93 differing only in Spotify fields. Kept the row with audio features, else the first |
 | **Songs loaded** | **29,383** | |
 
-**Why 3,000 rows were dropped.** The file's last 3,000 rows all begin after 2021-05-29,
-the final chart week of every other row. The real rows all start on a Saturday (Billboard's
-chart date); these start on every day of the week. 28% of them reach the top 5, against 10%
-of the real rows, none is missing audio features, many titles read like "Kill Bill (Version 1057)",
-and familiar songs are given the wrong albums and peaks. They look generated, so the analysis
-covers chart weeks from 1958-08-02 to 2021-05-29.
+**Why 3,000 rows were dropped.** The dataset's version 3 update (October 2026) added 3,000 songs
+described as chart issues from June 2021 to October 2026. Those rows fail checks the other 29,500 pass,
+so the analysis stops at the last chart week before them, 2021-05-29:
+
+- Billboard issue dates are Saturdays. All 29,500 original rows start on a Saturday; the added rows
+  start on all seven weekdays, about 14% each.
+- Many titles carry labels such as "Kill Bill (Version 1057)".
+- Some songs appear twice with conflicting peaks and dates (for example "Deja Vu" at #8 in 2021 and
+  #1 in 2024), but a song has one peak.
+- None of the added rows is missing audio features, against 17.5% of the original rows, and 28% of them
+  reach the top 5, against 10%.
+
+I could not tell whether the rows were generated or real data scrambled during assembly; either way
+they are not reliable. The analysis covers chart weeks from 1958-08-02 to 2021-05-29.
 
 **Checked against Billboard.** `weeks_on_chart` matches Billboard for "Radioactive" (87) and
 for "Blinding Lights" as of 2021-05-29 (76; it reached 88 later in 2021).

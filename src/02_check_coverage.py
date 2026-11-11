@@ -27,7 +27,7 @@ def main() -> None:
     df = pd.read_csv(CSV, low_memory=False)
     df["first_week"] = pd.to_datetime(df["first_week"], errors="coerce")
     df["last_week"] = pd.to_datetime(df["last_week"], errors="coerce")
-    # Leave out the 3,000 synthetic rows after the final real chart week
+    # Leave out the 3,000 unreliable rows after the final real chart week
     # (PRD Section 1). The 3 corrupted rows have no dates and are kept here
     # so section 4 can show them.
     df = df[~(df["last_week"] > pd.Timestamp("2021-05-29"))]

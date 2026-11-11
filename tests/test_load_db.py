@@ -24,7 +24,7 @@ def test_report(fixture_db):
     r = fixture_db["report"]
     assert r["raw rows"] == 14
     assert r["dropped: corrupted (no chart data)"] == 1
-    assert r["dropped: synthetic (after 2021-05-29)"] == 1
+    assert r["dropped: unreliable (after 2021-05-29)"] == 1
     assert r["dropped: duplicate song_id"] == 2
     assert r["songs with no audio features"] == 2
     assert r["songs still charting on 2021-05-29"] == 2

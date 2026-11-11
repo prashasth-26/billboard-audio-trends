@@ -14,7 +14,7 @@
 - `sql/schema.sql` - Four tables (`artists`, `songs`, `audio_features`, `song_genres`) with primary and foreign keys.
 - `sql/analysis/01_longevity_by_decade.sql` ... `08_explicit_share_by_decade.sql` - The 8 analysis queries.
 - `tests/conftest.py` - Adds `src/` to the path and builds a database from the fixture.
-- `tests/fixtures/mini_billboard.csv` - 14 hand-built rows with known answers (duplicates, a corrupted row, a unreliable row).
+- `tests/fixtures/mini_billboard.csv` - 14 hand-built rows with known answers (duplicates, a corrupted row, an unreliable row).
 - `tests/test_cleaning.py` - Unit tests for `src/cleaning.py`.
 - `tests/test_load_db.py` - Loader tests: row counts, report, keys, foreign keys, idempotent re-load.
 - `tests/test_queries.py` - Each query against the fixture, with hand-worked expected values.
