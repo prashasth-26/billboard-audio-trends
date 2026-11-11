@@ -6,7 +6,7 @@
   4. Rows with no chart data
   5. How peak_position is distributed (for the "high chart position" threshold)
 
-Run from the project root:  python src/02_check_coverage.py
+Run from the project root:  python3 src/02_check_coverage.py
 Paste the full output back into chat.
 """
 from pathlib import Path
@@ -27,6 +27,10 @@ def main() -> None:
     df = pd.read_csv(CSV, low_memory=False)
     df["first_week"] = pd.to_datetime(df["first_week"], errors="coerce")
     df["last_week"] = pd.to_datetime(df["last_week"], errors="coerce")
+    # Leave out the 3,000 synthetic rows after the final real chart week
+    # (PRD Section 1). The 3 corrupted rows have no dates and are kept here
+    # so section 4 can show them.
+    df = df[~(df["last_week"] > pd.Timestamp("2021-05-29"))]
     df["decade"] = (df["first_week"].dt.year // 10 * 10).astype("Int64")
 
     # 1. Missing audio features by decade

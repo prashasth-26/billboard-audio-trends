@@ -11,18 +11,20 @@ This project loads a Kaggle dataset that combines per-song Billboard Hot 100 cha
 **Source dataset:** Kaggle, `luthfimuthathohirin/billboard-hot-100-spotify-audio-features`. Inspected on 2026-11-09 with `src/01_inspect.py`. Findings:
 
 - One file, `billboard_hot_100_spotify_audio_features_enriched.csv`: 32,503 rows x 33 columns, **one row per song**, not per chart week.
+- **The last 3,000 rows (file rows 29,504-32,503) appear to be synthetic and are excluded.** Found on 2026-11-09 with `src/02b_check_duplicates.py`. Evidence: every one of them starts after 2021-05-29, the final chart week of the other 29,500 rows; their dates fall on every day of the week, while all 29,500 earlier rows start on a Saturday (Billboard chart dates); 279 of every 1,000 reach the top 5, against 103 in the earlier rows; none is missing audio features; many titles carry labels such as "Kill Bill (Version 1057)"; and known songs are attached to the wrong albums and peaks (for example "Blinding Lights" re-charting at #5 in 2025 from "The Idol Soundtrack", "Deja Vu" peaking at #1 in 2024). All 20 shared IDs whose chart fields differed were pairs of a real row and one of these rows. The project uses the 29,500 earlier rows, covering chart weeks from 1958-08-02 to 2021-05-29. The README must say so.
 - **There is no weekly chart history.** Chart information is limited to `peak_position`, `weeks_on_chart`, `first_week` and `last_week`.
-- `song_id` is the song title and performer joined with no separator, and it is not unique: 135 IDs are shared by 272 rows. Only 48 of those rows are identical across all 33 columns. Some pairs differ in chart fields too (for example "Adore You" by Harry Styles appears twice with different peaks and dates), so they are not all simple duplicates.
-- About 15.9% of rows (5,169) have no Spotify audio features; 5,106 have no Spotify track ID. Missing audio features cluster in older decades, by decade of `first_week`: 1950s 34.6%, 1960s 23.8%, 1970s 20.6%, 1980s 14.8%, 1990s 18.1%, 2000s 8.6%, 2010s 6.0%, 2020s 8.5%.
-- 3 rows have no chart data and look corrupted rather than merely incomplete: one has a song title stored as the number 37623 (a date conversion of "1/2/03"), one has a performer recorded as "4", and one has a garbled character in its ID. They are dropped.
-- `first_week` runs from 1958-08-02 to 2026-10-10; the latest `last_week` is 2026-10-23. The latest `last_week` values fall on every weekday from 2026-10-11 to 2026-10-23 (1 to 5 songs per day), unlike the Saturday dates seen elsewhere, so no single end date marks "still charting". Songs still on the chart at the end of the data have incomplete (right-censored) `weeks_on_chart`.
+- 3 rows (file rows 29,501-29,503) have no chart data and look corrupted: one has a song title stored as the number 37623 (a date conversion of "1/2/03"), one has a performer recorded as "4", and one has a garbled character in its ID. They are dropped.
+- Figures below are for the 29,500 kept rows.
+- `song_id` is the song title and performer joined with no separator, and it is not unique: 117 IDs are shared by 234 rows (every shared ID has exactly 2 rows). 24 pairs are identical in every column; 93 pairs have identical chart fields and differ only in Spotify or generated columns (usually `spotify_track_popularity`). No pair differs in chart fields.
+- 5,167 rows (17.5%) have no Spotify audio features. By decade of `first_week`: 1950s 34.6% (of 926), 1960s 23.8% (6,852), 1970s 20.6% (5,299), 1980s 14.8% (4,114), 1990s 18.1% (3,423), 2000s 8.6% (3,419), 2010s 6.0% (4,552), 2020-21 36.4% (915).
+- The final chart week is 2021-05-29 (a Saturday). 99 songs have that `last_week`, close to the 100 songs on one Hot 100 chart, so they are the songs still charting when the data ends; their `weeks_on_chart` is incomplete (right-censored). Within 14, 28 and 56 days of it: 131, 154 and 205 songs.
 - `weeks_on_chart` counts weeks charted, not the span between `first_week` and `last_week`: seasonal songs return year after year (for example "A Holly Jolly Christmas" has 19 weeks across a four-year span).
-- `spotify_genre` is a list stored as text (for example `['pop', 'dance pop']`); 4.9% are null.
-- Seven columns appear to be generated from the other columns rather than observed: `chart_success_tier`, `hit_longevity_profile`, `acoustic_mood_cluster`, `musical_era`, `evidence_span`, `cot_rationale` and `confidence_score`. The two text columns restate the numeric columns in templated sentences. Because they are derived from chart results, audio features or dates, they must not be used as model inputs or treated as independent evidence. The Kaggle data card describes them as enrichment labels, with "Chain-of-Thought" rationale text and a "Bayesian" confidence score. These are labels derived from the chart and audio columns, not independent measurements, and the confidence score has no usable meaning.
+- **`weeks_on_chart` checked against Billboard:** "Radioactive" has 87 weeks in the file and 87 on Billboard; "Blinding Lights" has 76, which is right for the data's end date of 2021-05-29 (it debuted 2019-12-14 and missed one chart week, reaching 88 weeks on the chart dated 2021-08-21). The data card's 88 refers to a later date. The column is treated as accurate up to 2021-05-29.
+- `spotify_genre` is a list stored as text (for example `['pop', 'dance pop']`); some are null.
+- Seven columns appear to be generated from the other columns rather than observed: `chart_success_tier`, `hit_longevity_profile`, `acoustic_mood_cluster`, `musical_era`, `evidence_span`, `cot_rationale` and `confidence_score`. The two text columns restate the numeric columns in templated sentences. The Kaggle data card describes them as enrichment labels, with "Chain-of-Thought" rationale text and a "Bayesian" confidence score. They are derived from the chart and audio columns, not independent measurements; they are not loaded, not used as model inputs and not treated as evidence.
 - `spotify_track_popularity` is a 0-100 Spotify score that depends on when the data was pulled and may reflect a song's chart success and recency. It is excluded from model inputs.
 - **License:** CC0 Public Domain, per the Kaggle page (checked 2026-11-09).
-- **Peak position:** 1,328 songs peaked at #1 (4.1%), 3,879 at #5 or better (11.9%), 6,436 at #10 or better (19.8%), 10,172 at #20 or better (31.3%).
-- **Unverified:** the data card quotes 88 weeks on chart for "Blinding Lights", but the row inspected showed 76. The accuracy of `weeks_on_chart` has not been checked.
+- **Peak position:** 1,133 songs peaked at #1 (3.8%), 3,042 at #5 or better (10.3%), 5,019 at #10 or better (17.0%), 8,008 at #20 or better (27.1%). These counts include both rows of each shared ID; the loader's counts after removing duplicates are reported in the README.
 
 **Who uses it:** The author (to learn and to put on a resume), and recruiters or interviewers reading the repository, queries, README and dashboard.
 
@@ -67,10 +69,10 @@ This project loads a Kaggle dataset that combines per-song Billboard Hot 100 cha
 6. The schema must be defined in `sql/schema.sql`, with primary keys and foreign keys. The source is one flat table, so the schema is built by splitting it. Working proposal: `songs` (ID, title, performer, peak position, weeks on chart, first and last week, still-charting flag), `audio_features` (one row per song that has Spotify data), `song_genres` (one row per song-genre pair, built by parsing the text list in `spotify_genre`), and optionally `artists` (primary artist parsed from `performer`). The genre split is the clearest reason to normalize, because it is a real one-to-many relationship. The choice must be explained in the README.
 7. Loading must be safe to re-run: running it twice must not create duplicate rows.
 8. The loader must report: row counts per table, and the count of songs with no audio features.
-   - 8a. The loader must sort the 135 shared `song_id` values into three groups: rows identical in every column (keep one), rows identical in all chart fields but differing in Spotify or generated columns (keep one and record the rule), and rows with different chart fields (decide a rule, for example treat as separate chart runs, and record it). The README must state the counts per group and the rule used.
+   - 8a. Before anything else, the loader must keep only rows whose `last_week` is on or before 2021-05-29, which drops the 3,000 synthetic rows (Section 1). It must then keep one row per `song_id`: of the 117 shared IDs, 24 pairs are identical, and 93 differ only in Spotify or generated columns; for those it keeps the row that has audio features, and otherwise the first row in file order. The README must state these counts and the rule.
    - Because `song_id` is not unique and joins title to performer without a separator, the loader must create its own integer key.
    - 8b. The loader must drop the 3 corrupted rows with no chart data, and the README must say so.
-   - 8c. The loader must add a `still_charting` flag. Working rule: a song is flagged if its `last_week` is within 28 days of the latest `last_week` in the data. The README must report how many songs this flags and how results change if the window is 14 or 56 days.
+   - 8c. The loader must add a `still_charting` flag: a song is flagged if its `last_week` equals the final chart week, 2021-05-29 (99 songs). The README must report this count.
 
 ### Analysis questions (Must unless marked)
 
@@ -94,7 +96,7 @@ This project loads a Kaggle dataset that combines per-song Billboard Hot 100 cha
 
 ### Prediction model (Could)
 
-20. Define the prediction target from `peak_position`, for example "reached the top 10" versus "peaked lower". The threshold is the top 5 (3,879 songs, about 11.9%; chosen by the author); it must be a named constant, and the class balance must be reported. Because roughly 88% of songs fall in the "peaked lower" class, a model that always guesses "lower" is right about 88% of the time, so ROC AUC is the main metric and accuracy is secondary.
+20. Define the prediction target from `peak_position`, for example "reached the top 10" versus "peaked lower". The threshold is the top 5 (about 10% of songs; chosen by the author); it must be a named constant, and the class balance must be reported. Because roughly 90% of songs fall in the "peaked lower" class, a model that always guesses "lower" is right about 90% of the time, so ROC AUC is the main metric and accuracy is secondary.
 21. Fit a baseline logistic regression and one tree-based model (random forest or gradient boosting) using only the Spotify audio features (danceability, energy, key, loudness, mode, speechiness, acousticness, instrumentalness, liveness, valence, tempo, time signature) and, optionally, duration and the explicit flag. The model must NOT use `chart_success_tier`, `hit_longevity_profile`, `acoustic_mood_cluster`, `musical_era`, `evidence_span`, `cot_rationale`, `confidence_score`, `spotify_track_popularity`, `weeks_on_chart`, or any other column derived from chart results, because they leak the outcome. Rows without audio features are excluded and the count reported.
 22. Split train and test sets **by time** (older songs train, newer songs test), not randomly, so the test reflects predicting newer songs. Because the newest songs may still be on the chart, their peak positions can still change; the README must state how songs still charting at the end of the data were handled (for example, excluded from the test set).
 23. Report accuracy alongside a baseline that always predicts the majority class, plus ROC AUC. A model that does not beat the majority-class baseline must be reported as such.
@@ -128,14 +130,14 @@ This project loads a Kaggle dataset that combines per-song Billboard Hot 100 cha
 - **Language and libraries:** Python, pandas, SQLite (via Python's built-in `sqlite3`), scikit-learn for the model, pytest, Tableau Public.
 - **Why SQLite (decided):** It needs no server, runs on any machine, and supports CTEs and window functions (`LAG`, `RANK`) since version 3.25, so it covers every keyword this project needs. SQLite is not the most common database in job listings (PostgreSQL, MySQL and SQL Server are), but most postings ask for "SQL" in general, and the queries here will be written in standard SQL that also runs on PostgreSQL. The README and resume should say "SQL (SQLite)" and not claim PostgreSQL experience. PostgreSQL would add installation work that conflicts with the weekend budget. DuckDB was used in PRD 0001 and also works, but is less commonly listed by employers.
 - **Schema considerations:** The source is one flat table. Splitting it (songs, audio features, song genres, optionally artists) lets you demonstrate joins and keys, and the genre list is a genuine one-to-many relationship. The cost is extra loading code, and artist names are free text (collaborations are written out in one string) that needs cleaning to make clean keys. Keeping a single table is faster but shows less.
-- **Missing audio features:** About 15.9% of songs have no audio features. The loader must report coverage by decade, and the README must state this.
+- **Missing audio features:** About 17.5% of songs have no audio features. The loader must report coverage by decade, and the README must state this.
 - **Repository layout:** `src/` (scripts), `sql/` (schema and queries), `tests/`, `data/` (git-ignored), `tasks/` (PRD and task list), `README.md`.
 - **Authorship:** The analysis questions, SQL queries and model choices must be explainable by the author. Scaffolding (repo layout, loader, test setup, README skeleton) may be generated.
 - **Licensing:** The Kaggle page lists the license as CC0 Public Domain. The repository still does not include the raw data; the README links to the Kaggle page.
 
 ## 9. Success Metrics
 
-1. `python src/00_download.py` followed by the loader builds the database from scratch without errors.
+1. `python3 src/00_download.py` followed by the loader builds the database from scratch without errors.
 2. At least 8 documented SQL queries exist using joins, CTEs and window functions.
 3. `pytest` passes on a fresh checkout.
 4. The README states the match rate between chart songs and audio features, and every decade-level finding shows its sample size.
@@ -145,11 +147,11 @@ This project loads a Kaggle dataset that combines per-song Billboard Hot 100 cha
 
 ## 10. Open Questions
 
-1. **Dataset contents:** Answered; see Section 1. Still open: which columns differ between the repeated `song_id` rows.
+1. **Dataset contents:** Answered; see Section 1, including the 3,000 synthetic rows and the duplicate groups.
 2. **Grammys:** The author leaned toward leaving them out. Revisit only if the core work finishes early and a clean Grammy dataset is found.
 3. **Schema:** Decided: split the flat table into songs, audio features and song genres (requirement 6), with the artists table optional. The author deferred to the recommendation.
 4. **Database:** Decided: SQLite (see Section 8).
-5. **Model target:** Decided: top 5 (11.9% of songs), chosen by the author.
+5. **Model target:** Decided: top 5 (about 10% of songs after the synthetic rows are removed), chosen by the author.
 6. **Dataset license:** Resolved: CC0 Public Domain. Credit the source in the README anyway.
 7. **Scope:** If the weekend runs out, the working plan is to drop the model first, then Tableau, and keep SQL, tests and README.
-8. **`weeks_on_chart` accuracy:** The data card quotes 88 weeks for "Blinding Lights" and the row inspected showed 76. Check a few well-known songs against Billboard before relying on the weeks figures.
+8. **`weeks_on_chart` accuracy:** Resolved: matches Billboard for the songs checked, as of 2021-05-29 (Section 1).
