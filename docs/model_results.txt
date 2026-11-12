@@ -1,0 +1,34 @@
+Target: peaked at #5 or better
+Songs in database: 29,383; with complete audio features: 24,220 (5,163 excluded)
+Train: first charted 1958-2009, 19,465 songs, 12.3% top 5
+Test:  first charted 2010-2021, 4,694 songs, 6.4% top 5 (61 still-charting songs left out)
+
+Model                       Accuracy  ROC AUC
+Baseline (always 'no')         0.936    0.500
+Logistic regression            0.518    0.633
+Random forest                  0.739    0.595
+(The two real models are trained to weigh top-5 songs more heavily, so they
+ flag more songs as hits and score lower accuracy than the baseline by design.)
+
+Logistic regression coefficients (per 1 standard deviation; + = more likely top 5):
+  danceability       +0.216
+  energy             -0.157
+  loudness           +0.125
+  duration_ms        +0.111
+  speechiness        -0.077
+  liveness           -0.077
+  instrumentalness   -0.062
+  time_signature     +0.061
+  acousticness       +0.055
+  explicit           -0.042
+  tempo              +0.032
+  musical_key        -0.027
+  mode               -0.025
+  valence            -0.003
+
+Permutation importance on the test set (drop in ROC AUC when a feature is shuffled):
+  Logistic regression: danceability +0.078, explicit +0.028, loudness +0.024, speechiness +0.022, duration_ms +0.010
+  Random forest: danceability +0.064, speechiness +0.014, duration_ms +0.010, explicit +0.004, instrumentalness +0.003
+
+These are associations among songs that charted, not causes, and not a way to
+pick hits from all released music.

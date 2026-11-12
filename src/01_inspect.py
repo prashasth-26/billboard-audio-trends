@@ -3,7 +3,7 @@
 Makes no assumptions about column names. Paste the output back into chat
 so the schema can be designed from what is actually in the files.
 
-Run from the project root:  python src/01_inspect.py
+Run from the project root:  python3 src/01_inspect.py
 """
 from pathlib import Path
 

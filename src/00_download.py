@@ -1,6 +1,6 @@
 """Download the Billboard Hot 100 + Spotify audio features dataset into data/raw/.
 
-Run from the project root:  python src/00_download.py
+Run from the project root:  python3 src/00_download.py
 """
 import shutil
 from pathlib import Path
