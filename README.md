@@ -8,8 +8,7 @@ dashboard and a simple model of which audio features go with reaching the top 5.
 **Skills:** SQL (SQLite: joins, CTEs, window functions `LAG`, `RANK`, `ROW_NUMBER`),
 relational schema design, Python (pandas), pytest, scikit-learn, Tableau Public.
 
-**Dashboard:**  (see docs/dashboard.png)
-https://public.tableau.com/views/BillboardAudioFeaturesbyDecade-Analysis/Dashboard1?:language=en-US&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link
+**Dashboard:** [Billboard audio features by decade (Tableau Public)](https://public.tableau.com/views/BillboardAudioFeaturesbyDecade-Analysis/Dashboard1)
 
 ## Questions
 
