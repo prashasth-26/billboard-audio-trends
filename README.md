@@ -153,6 +153,8 @@ The SQL avoids SQLite-only features, so it should also run on PostgreSQL.
 Requires Python 3.10+.
 
 ```bash
+git clone https://github.com/prashasth-26/billboard-audio-trends.git
+cd billboard-audio-trends
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
